@@ -6,6 +6,7 @@ function errorHandler(err: HttpException, req: Request, res: Response, next: Nex
     let message = err.message || "internal server error";
     let errors:any[] = []
     console.log(typeof errors,">>>>>TYEP");
+    console.log(err, '<<<<<<<<<<<<<< ERRROR');
     
     if(err.message == "ExpressValidationError") {
         err.errors.forEach(err => {

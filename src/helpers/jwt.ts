@@ -7,6 +7,6 @@ export const generateToken = (payload: object): string => {
     return jwt.sign(payload, SECRET);
 }
 
-export const verifyToken = (payload: string): any=> {
+export const verifyToken = (payload: any): any=> {
     return jwt.verify(payload, SECRET);
 }

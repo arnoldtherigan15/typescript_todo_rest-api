@@ -3,6 +3,7 @@ import { UserRouter, TodoRouter } from "./routes";
 import morgan from "morgan";
 import cors from "cors";
 import { config as dotenv } from "dotenv";
+import errorHandler from "./middlewares/ErrorHandler";
 
 class App {
   public app: express.Application;
@@ -19,11 +20,16 @@ class App {
     this.app.use("/todos", TodoRouter)
   }
 
+  private initializeErrorHandling() {
+    this.app.use(errorHandler);
+  }
+
   constructor() {
     this.app = express();
     this.config();
-    this.routes()
     dotenv()
+    this.routes()
+    this.initializeErrorHandling()
   }
 }
 

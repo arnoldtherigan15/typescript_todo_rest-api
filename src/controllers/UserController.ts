@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { hashPassword, comparePassword } from "../helpers/bcrypt";
+import { comparePassword } from "../helpers/bcrypt";
 import { generateToken } from "../helpers/jwt"
-import HttpException from "../exceptions/HttpException";
 const { User } = require("../db/models");
 
 class UserController {
@@ -20,17 +19,16 @@ class UserController {
   public async register(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
-      const hashedPassword: string = await hashPassword(password);
       const user = await User.create({
         email,
-        password: hashedPassword
+        password
       });
       return res.status(201).json({
         status: 201,
         message: "User success to register",
         user: { id: user.id, email: user.email }
       });
-    } catch (error) { next(new HttpException(500, "RegisterValidationError", ["internal server error"])) }
+    } catch (err) { next(err) }
   }
   public async login(req: Request, res: Response, next: NextFunction) {
     try {
@@ -52,7 +50,7 @@ class UserController {
         }) 
         else throw { msg: "email or password is wrong" };
       } else throw { msg: "email or password is wrong" };
-    } catch (error) { next(new HttpException(400, "LoginValidationError", error.msg)) }
+    } catch (err) { next(err) }
 
   }
 }

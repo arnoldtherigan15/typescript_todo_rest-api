@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction, response } from "express";
 import { body, validationResult } from "express-validator";
-import HttpException from "../exceptions/HttpException"
-const { User } = require("../db/models")
+const { User } = require("../db/models");
 
 class Validator {
     public validateRegister: any[];
@@ -26,7 +25,7 @@ class Validator {
             body("password").isLength({ min: 6 }).withMessage("password minimal 6 char"),
             (req: Request, res: Response, next: NextFunction) => {
                 let errors = validationResult(req);
-                if(!errors.isEmpty()) next(new HttpException(400, "ExpressValidationError", errors.array()))
+                if(!errors.isEmpty()) next(errors.array())
                 else next()
             }
         ]
@@ -38,7 +37,7 @@ class Validator {
             body("password").notEmpty().withMessage("password is required"),
             (req: Request, res: Response, next: NextFunction) => {
                 let errors = validationResult(req);
-                if(!errors.isEmpty()) next(new HttpException(400, "ExpressValidationError", errors.array()))
+                if(!errors.isEmpty()) next(errors.array())
                 else next()
             }
         ]

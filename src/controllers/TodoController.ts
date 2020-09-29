@@ -1,21 +1,29 @@
 import { Request, Response, NextFunction } from "express";
-import HttpException from "../exceptions/HttpException";
 const { Todo } = require("../db/models");
 
 class TodoController  {
-  public async showAll (req: Request, res: Response, next: NextFunction) {
+  public async showAll (req: any, res: Response, next: NextFunction) {
     try {
-      const todos = await Todo.findAll()
+      const todos = await Todo.findAll({ where: { userId: req.loggedUser.id } })
       return res.json({ todos });
-    } catch (error) { next(new HttpException(500, "InternalServerError", ["internal server error"])) } 
+    } catch (err) { next(err) } 
   }
 
-  public async create (req: Request, res: Response, next: NextFunction) {
+  public async create (req: any, res: Response, next: NextFunction) {
     try {
+      let { id } = req.loggedUser
       const { title } = req.body;
-      const todo = await Todo.create({ title });
+      const todo = await Todo.create({ title, userId:id });
       return res.status(201).json({ todo });
-    } catch (error) { next(new HttpException(500, "InternalServerError", ["internal server error"])) } 
+    } catch (err) { next(err) } 
+  }
+
+  public async destroy (req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      await Todo.destroy({ where:{ id } });
+      return res.status(200).json({ msg: `todo id : ${id} is deleted` });
+    } catch (err) { next(err) } 
   }
 }
 

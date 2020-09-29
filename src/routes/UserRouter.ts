@@ -5,7 +5,7 @@ import UserValidator from "../middlewares/UserValidator";
 class UserRouter extends BaseRouter {
     public routes(): void {
         this.router.get("/",UserController.showAll);
-        this.router.post("/register", UserValidator.validateRegister, UserController.register);
+        this.router.post("/register", UserController.register);
         this.router.post("/login", UserValidator.validateLogin, UserController.login);
     }
 }

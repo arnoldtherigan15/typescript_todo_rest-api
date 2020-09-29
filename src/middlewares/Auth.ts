@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../helpers/jwt";
-import HttpException from "../exceptions/HttpException";
-const { User } = require("../db/models");
+const { User, Todo } = require("../db/models");
 
-export const authentication = (req: Request | any, res: Response, next: NextFunction): any => {
+export const authentication = async (req: Request | any, res: Response, next: NextFunction) => {
     try {
         const { token } = req.headers
-        if(!token) throw { msg: "token must be provided" }
+        if(!token) throw { status: 401, msg: "token must be provided" }
         const decoded = verifyToken(token)
-        const user = User.findOne({
+        const user = await User.findOne({
             where: { email: decoded.email }
         })
         if(!user) throw { status: 401, msg: "authentication failed" };
@@ -16,7 +15,21 @@ export const authentication = (req: Request | any, res: Response, next: NextFunc
             req.loggedUser = decoded;
             next()
         }
-    } catch (error) {
-        next(new HttpException(error.status, "AuthenticationError", error.msg))
+    } catch (err) {
+        console.log(err,'<<<<errr');
+        
+        next(err)
+    }
+}
+
+export const authorization = async (req: Request | any, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        let todo = await Todo.findByPk(id);
+        if(!todo) throw { status: 404, msg: "todo not found" };
+        else if (todo.userId == req.loggedUser.id) next();
+        else throw { status: 403, msg: "you're not authorize to do this" };
+    } catch (err) {
+        next(err)
     }
 }

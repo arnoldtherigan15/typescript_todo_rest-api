@@ -1,20 +1,37 @@
 import { Response, Request, NextFunction } from "express";
-import HttpException from "../exceptions/HttpException";
 
-function errorHandler(err: HttpException, req: Request, res: Response, next: NextFunction): void {
+function errorHandler(err: any, req: Request, res: Response, next: NextFunction):void {
+
     let status = err.status || 500;
     let message = err.message || "internal server error";
     let errors:any[] = []
-    console.log(typeof errors,">>>>>TYEP");
-    console.log(err, '<<<<<<<<<<<<<< ERRROR');
-    
-    if(err.message == "ExpressValidationError") {
-        err.errors.forEach(err => {
-            errors.push(err.msg)
-        });
-    } else errors.push(err.errors)
 
-    res.status(status).json({ status, message, errors })
+    type errorType = {
+        msg: string,
+        message: string
+    }
+
+    switch (err.name) {
+        case "SequelizeValidationError":
+        case "SequelizeUniqueConstraintError":
+            err.errors.forEach((e: errorType) => {
+                errors.push(e.message)
+            });
+            status = 400;
+            break;
+        case "JsonWebTokenError":
+            status = 401;
+            errors.push("invalid token")
+            break;
+        default:
+            status = err.status || 500;
+            message = err.msg || "internal server error";
+            errors.push(message);
+            break;
+    }
+
+
+    res.status(status).json({ errors })
 }
 
 export default errorHandler
